@@ -2,26 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+@import "~stream-chat-react/dist/css/v2/index.css";
+
+.str-chat{
+  --str_chat__primary-color:theme(colors.blue.500);
+  --str_chat__active-primary-color:theme(colors.blue.600);
+  --str_chat__disabale-color:theme(colors.gray.200);
+  --str_chat__cta-button-border-radius: theme(borderRadius.DEFAULT)
+}
+.dark .str-chat {
+  --str-chat__disable-color:theme(colors.gray.600)
+}
+.str-chat * {
+  font-family: inherit !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
