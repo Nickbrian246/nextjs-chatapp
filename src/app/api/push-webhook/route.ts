@@ -24,7 +24,9 @@ export async function POST(req: Request) {
     const event = JSON.parse(rawBody);
     const sender = event.user;
     const recipientIds = event.channel.members
+      //@ts-ignore
       .map((member) => member.user_id)
+      //@ts-ignore
       .filter((id) => id !== sender.id);
     const channelId = event.channel.id;
 
