@@ -12,6 +12,7 @@ interface ChatSideBarPros {
   onClose: () => void;
   isUserMenuOpen: boolean;
   setIsUserMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  customActiveChannel?: string;
 }
 
 export default function ChatSideBar({
@@ -20,6 +21,7 @@ export default function ChatSideBar({
   onClose,
   isUserMenuOpen,
   setIsUserMenuOpen,
+  customActiveChannel,
 }: ChatSideBarPros) {
   const ChannerPreviewCustom = useCallback(
     (props: ChannelPreviewUIComponentProps) => (
@@ -56,6 +58,7 @@ export default function ChatSideBar({
         }}
         sort={{ last_message_at: -1 }}
         options={{ state: true, presence: true, limit: 10 }}
+        customActiveChannel={customActiveChannel}
         showChannelSearch
         additionalChannelSearchProps={{
           searchForChannels: true,

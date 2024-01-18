@@ -14,8 +14,18 @@ import MenuBar from "./MenuBar";
 import useInitializeChatClinet from "./useInitializeChatClient";
 import { mdBreakpoint } from "@/utils/tailwind";
 import { useTheme } from "../ThemeProvider";
+import { registerServiceWorker } from "@/utils/serviceWorker";
+import {
+  getCurrentPushSubscription,
+  sendPushsubscriptionToServer,
+} from "@/notifications/pushService";
+import PushMessageListener from "./PushMessageListener";
 
-export default function Chat() {
+interface ChatPageProps {
+  searchParams: { channelId?: string };
+}
+
+export default function Chat({ searchParams: { channelId } }: ChatPageProps) {
   const chatClient = useInitializeChatClinet();
   const { user } = useUser();
   const [chatSideBarOpen, setChatSideBarOpen] = useState<boolean>(false);
@@ -28,6 +38,35 @@ export default function Chat() {
   useEffect(() => {
     if (windowSize.width >= mdBreakpoint) setChatSideBarOpen(false);
   }, [windowSize.width]);
+
+  useEffect(() => {
+    async function syncPushSuscription() {
+      try {
+        const subscription = await getCurrentPushSubscription();
+        if (subscription) {
+          await sendPushsubscriptionToServer(subscription);
+        }
+      } catch (error) {}
+    }
+    syncPushSuscription();
+  }, []);
+
+  useEffect(() => {
+    async function setUpServiceWorker() {
+      try {
+        await registerServiceWorker();
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setUpServiceWorker();
+  }, []);
+
+  useEffect(() => {
+    if (channelId) {
+      history.replaceState(null, "", "/chat");
+    }
+  }, [channelId]);
 
   const handleSidebarOnclose = useCallback(() => {
     setChatSideBarOpen((prevState) => !prevState);
@@ -91,6 +130,7 @@ export default function Chat() {
                   show={true}
                   onClose={handleSidebarOnclose}
                   setIsUserMenuOpen={setIsUserMenuOpen}
+                  customActiveChannel={channelId}
                 />
               </div>
             ) : (
@@ -106,6 +146,7 @@ export default function Chat() {
             <div className=" relative w-full">
               <ChatChannel hideChannelOnThread={!isLargeScreen} />
             </div>
+            <PushMessageListener />
           </div>
         </ChatStream>
       </div>

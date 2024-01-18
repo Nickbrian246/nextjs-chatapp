@@ -1,0 +1,51 @@
+import { Webhook } from "svix";
+import { NextResponse } from "next/server";
+import { Session } from "inspector";
+import { SessionWebhookEvent } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
+
+export async function POST(req: Request) {
+  try {
+    const rawBody = await req.text();
+    const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET || "");
+
+    try {
+      wh.verify(rawBody, {
+        "svix-id": req.headers.get("svix-id") || "",
+        "svix-signature": req.headers.get("svix-signature") || "",
+        "svix-timestamp": req.headers.get("svix-timestamp") || "",
+      });
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Webhook signature invalid" },
+        { status: 401 }
+      );
+    }
+    const event: SessionWebhookEvent = JSON.parse(rawBody);
+    if (
+      event.type === "session.ended" ||
+      event.type === "session.removed" ||
+      event.type === "session.revoked"
+    ) {
+      const userId = event.data.user_id;
+      const sessionId = event.data.id;
+
+      const user = await clerkClient.users.getUser(userId);
+      const userSubscriptions = user.privateMetadata.subscription || [];
+
+      const updatedSubscriptions = userSubscriptions.filter(
+        (subscription) => subscription.sessionId !== sessionId
+      );
+
+      await clerkClient.users.updateUser(user.id, {
+        privateMetadata: { subscription: updatedSubscriptions },
+      });
+    }
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Webhook signature invalid" },
+      { status: 401 }
+    );
+  }
+}

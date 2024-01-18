@@ -9,6 +9,7 @@ import {
   ChannelList,
 } from "stream-chat-react";
 import UsersMenu from "./UsersMenu";
+import CustomChannelHeader from "./CustomChannelHeader";
 interface ChatChannelProps {
   hideChannelOnThread: boolean;
 }
@@ -18,7 +19,8 @@ export default function ChatChannel({ hideChannelOnThread }: ChatChannelProps) {
     <>
       <Channel>
         <Window hideOnThread={hideChannelOnThread}>
-          <ChannelHeader />
+          {/* <ChannelHeader /> */}
+          <CustomChannelHeader />
           <MessageList />
           <MessageInput />
         </Window>
